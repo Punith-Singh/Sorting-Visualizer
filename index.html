@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bubble Sort, animated</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07060d;--ink:#f4f1ff;--mute:#9a96b3;--blue:#3aa0ff;--orange:#ff9f1c;--green:#22c55e;--slate:#26304a;--panel:#0d0b16;--line:#2a1b2e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:radial-gradient(ellipse at 50% 38%,#1c0f2e 0,var(--bg) 62%),var(--bg);color:var(--ink);font-family:Sora,system-ui,sans-serif;display:flex;justify-content:center;min-height:100vh}
+main{width:100%;max-width:430px;padding:28px 16px 40px;text-align:center;position:relative;overflow-x:clip}
+h1{margin:0;font-size:2.1rem;font-weight:800;letter-spacing:.01em;position:relative;z-index:2}
+.sub{margin:8px auto 14px;max-width:310px;color:var(--mute);font-size:.82rem;line-height:1.45;position:relative;z-index:2}
+.pills{display:flex;gap:10px;justify-content:center;position:relative;z-index:2}
+.pill{font:600 .72rem 'JetBrains Mono',monospace;padding:4px 12px;border-radius:99px;border:1.5px solid var(--blue);color:var(--ink);background:#0a1a2c}
+.pill.s{border-color:var(--green);background:#0a2218}
+
+.scene{position:relative;width:352px;height:330px;margin:0 auto;cursor:pointer;max-width:100%}
+.scene svg.beams{position:absolute;left:0;top:0;width:352px;height:330px;overflow:visible;pointer-events:none;z-index:1}
+.beams line{stroke:#e8e4ff;stroke-width:1.6;opacity:0;transition:opacity .15s}
+.beams line.on{opacity:.85}
+#thread{stroke:#e8e4ff;stroke-width:2.5;opacity:1}
+.hero{position:absolute;left:136px;top:20px;width:80px;z-index:3;transform-origin:40px 6px;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+.hero.win{animation:cheer .5s ease-in-out infinite alternate}
+.sway{transform-origin:40px 6px;animation:sway 3.2s ease-in-out infinite}
+.hero svg{display:block;transform-origin:40px 6px;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+@keyframes sway{0%,100%{rotate:-3deg}50%{rotate:3deg}}
+@keyframes cheer{from{transform:translateY(0) rotate(-8deg)}to{transform:translateY(8px) rotate(8deg)}}
+
+.platform{position:absolute;left:-6px;right:-6px;bottom:0;height:34px;border-radius:6px 6px 14px 14px;background:linear-gradient(#4a5878,#2a3350);box-shadow:0 14px 28px #000a;transform:perspective(500px) rotateX(18deg)}
+.bar{position:absolute;bottom:30px;width:38px;border-radius:4px;background:linear-gradient(#34405e,#1f2840);color:var(--ink);font:600 .95rem 'JetBrains Mono',monospace;transition:left .45s cubic-bezier(.5,0,.2,1),transform .3s,background .2s;z-index:2;display:flex;justify-content:center;padding-top:6px;box-shadow:inset 0 3px 0 #ffffff22}
+.bar.cmp{background:linear-gradient(#4db1ff,#1a6fc2)}
+.bar.sw{background:linear-gradient(#ffb84a,#d9770a);transform:translateY(-34px)}
+.bar.ok{background:linear-gradient(#34d870,#15803d)}
+.status{height:1.6rem;margin:6px 0 18px;font:600 1.05rem 'JetBrains Mono',monospace}
+.status.blue{color:var(--blue)}.status.orange{color:var(--orange)}.status.green{color:var(--green)}
+pre.code{margin:0;text-align:left;font:400 .78rem/1.85 'JetBrains Mono',monospace;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 0;overflow-x:auto}
+.ln{display:block;white-space:pre;padding:0 14px 0 0;border-left:3px solid transparent}
+.ln i{display:inline-block;width:2.4em;text-align:right;margin-right:1em;color:#5b6b52;font-style:normal}
+.ln.act{background:#3b0d12;border-left-color:#e11d48}
+.k{color:#6aa5ff}.f{color:#f0d79a}.n{color:#e9a982}
+
+.ctl{display:flex;gap:10px;justify-content:center;margin-top:18px}
+button{font:600 .85rem Sora,sans-serif;color:var(--ink);background:#1a1530;border:1px solid #3b3166;border-radius:99px;padding:9px 20px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.hero{animation:none}.bar{transition:none}}
+.algos{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding-bottom:16px;position:relative;z-index:3}
+.algos button{padding:7px 13px;font-size:.76rem}
+.algos button[aria-pressed=true]{background:#3b2a86;border-color:#8b5cf6}
+h1{font-size:clamp(1.6rem,8vw,2.1rem)}
+.inp{display:flex;gap:8px;margin-top:18px}
+.inp input[type=text],#nums{flex:1;min-width:0;font:400 .85rem 'JetBrains Mono',monospace;color:var(--ink);background:#120f22;border:1px solid #3b3166;border-radius:10px;padding:9px 12px}
+#nums:focus-visible{outline:2px solid var(--blue)}
+.err{min-height:1.2rem;margin-top:6px;color:#fb7185;font-size:.75rem}
+.spd{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:14px;color:var(--mute);font-size:.78rem}
+.bar.piv:not(.cmp):not(.sw):not(.ok){background:linear-gradient(#b79cff,#6d28d9)}
+.ctl{margin-top:4px}
+</style>
+</head>
+<body>
+<main>
+  <nav class="algos" id="algos" aria-label="Sorting algorithm"></nav>
+  <h1 id="title">BUBBLE SORT</h1>
+  <p class="sub" id="desc"></p>
+  <div class="pills"><span class="pill" id="tm"></span><span class="pill s" id="sp"></span></div>
+
+  <div class="scene" id="scene" title="Tap to pause or play">
+    <svg class="beams" viewBox="0 0 352 330">
+      <line id="thread" x1="176" y1="-420" x2="176" y2="26"/>
+      <line id="b1" x1="176" y1="70" x2="0" y2="0"/>
+      <line id="b2" x1="176" y1="70" x2="0" y2="0"/>
+    </svg>
+    <div class="hero" id="hero"><div class="sway">
+      <svg viewBox="0 0 80 110" width="80" aria-hidden="true">
+        <defs>
+          <radialGradient id="rGrad" cx="35%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="#ff4d4d"/>
+            <stop offset="60%" stop-color="#d40000"/>
+            <stop offset="100%" stop-color="#7a0000"/>
+          </radialGradient>
+          <radialGradient id="bGrad" cx="35%" cy="30%" r="75%">
+            <stop offset="0%" stop-color="#4a7aff"/>
+            <stop offset="60%" stop-color="#0033cc"/>
+            <stop offset="100%" stop-color="#001155"/>
+          </radialGradient>
+          <filter id="sh" x="-30%" y="-20%" width="160%" height="150%">
+            <feDropShadow dx="1.5" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.75"/>
+          </filter>
+        </defs>
+        <g filter="url(#sh)" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Web Thread -->
+          <line x1="40" y1="0" x2="40" y2="10" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+          
+          <!-- Legs -->
+          <line x1="40" y1="8" x2="28" y2="24" stroke="url(#rGrad)" stroke-width="9"/>
+          <line x1="28" y1="24" x2="35" y2="40" stroke="url(#bGrad)" stroke-width="11"/>
+          <line x1="40" y1="8" x2="52" y2="24" stroke="url(#rGrad)" stroke-width="9"/>
+          <line x1="52" y1="24" x2="45" y2="40" stroke="url(#bGrad)" stroke-width="11"/>
+
+          <!-- Torso -->
+          <path d="M31 38 L49 38 Q55 52 57 62 Q40 72 23 62 Q25 52 31 38Z" fill="url(#bGrad)"/>
+          <path d="M31 38 L49 38 Q46 52 49 62 Q40 68 31 62 Q34 52 31 38Z" fill="url(#rGrad)"/>
+          
+          <!-- Torso Web Details -->
+          <g stroke="#330000" stroke-width="0.8" fill="none" opacity="0.6">
+            <path d="M40 38 L40 65 M35 38 L33 63 M45 38 L47 63"/>
+            <path d="M31 46 Q40 50 49 46 M32 54 Q40 58 48 54 M33 60 Q40 64 47 60"/>
+          </g>
+
+          <!-- Arms (Connecting to the exact JS beam coordinates) -->
+          <line x1="25" y1="60" x2="19" y2="76" stroke="url(#bGrad)" stroke-width="8"/>
+          <line x1="19" y1="76" x2="20" y2="92" stroke="url(#rGrad)" stroke-width="7.5"/>
+          <line x1="55" y1="60" x2="61" y2="76" stroke="url(#bGrad)" stroke-width="8"/>
+          <line x1="61" y1="76" x2="60" y2="92" stroke="url(#rGrad)" stroke-width="7.5"/>
+
+          <!-- Head -->
+          <ellipse cx="40" cy="81" rx="12.5" ry="15" fill="url(#rGrad)"/>
+          
+          <!-- Head Web Details -->
+          <g stroke="#330000" stroke-width="0.8" fill="none" opacity="0.6">
+            <path d="M40 66 L40 96"/>
+            <path d="M40 66 L30 92"/>
+            <path d="M40 66 L50 92"/>
+            <path d="M40 66 L28 84"/>
+            <path d="M40 66 L52 84"/>
+            <path d="M30 73 Q40 77 50 73"/>
+            <path d="M28 80 Q40 85 52 80"/>
+            <path d="M28 87 Q40 92 52 87"/>
+            <path d="M33 93 Q40 97 47 93"/>
+          </g>
+
+          <!-- Iconic Spidey Eyes -->
+          <path d="M 39 74 Q 31 71 29 80 Q 32 84 39 85 Q 36 79 39 74 Z" fill="white" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M 41 74 Q 49 71 51 80 Q 48 84 41 85 Q 44 79 41 74 Z" fill="white" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+          
+          <!-- Specular Highlights for 3D Material feel -->
+          <ellipse cx="34" cy="70" rx="4" ry="2" fill="white" opacity="0.4" transform="rotate(-25 34 70)"/>
+          <ellipse cx="25" cy="58" rx="2" ry="1" fill="white" opacity="0.3" transform="rotate(-30 25 58)"/>
+          <ellipse cx="55" cy="58" rx="2" ry="1" fill="white" opacity="0.3" transform="rotate(30 55 58)"/>
+        </g>
+      </svg>
+    </div></div>
+    <div id="stage"></div>
+    <div class="platform"></div>
+  </div>
+
+  <div class="status" id="status" aria-live="polite"></div>
+
+<pre class="code" id="code"></pre>
+
+  <div class="inp"><input id="nums" aria-label="Numbers to sort" placeholder="e.g. 5, 3, 9, 1, 7"><button id="apply">Sort these</button></div>
+  <div class="err" id="err" role="alert"></div>
+  <div class="ctl"><button id="pp">Pause</button><button id="rs">Random numbers</button></div>
+  <label class="spd">Speed <input type="range" id="spd" min="0.5" max="2.5" step="0.25" value="1"></label>
+</main>
+
+<script>
+const BASE=30;let PITCH=44,BW=38,speed=1,vals=[3,2,7,5,4,1,8,6],items=[],paused=false,cur=0,th=0,key='bubble';
+const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const hero=$('hero'),heroSvg=hero.querySelector('svg'),stage=$('stage'),st=$('status'),b1=$('b1'),b2=$('b2'),codeEl=$('code');
+const L=(line,msg,ms)=>({t:'line',line,msg,ms}),C=(i,j,line,msg)=>({t:'cmp',i,j,line,msg:msg||`a[${i}] > a[${j}] ?`}),
+S=(i,j,line)=>({t:'swap',i,j,line,msg:`swap a[${i}], a[${j}]`}),M=(f,to,line)=>({t:'move',f,to,line,msg:`move a[${f}] to index ${to}`}),
+OK=(idx,line)=>({t:'ok',idx:[].concat(idx),line}),PV=(i,line)=>({t:'piv',i,line}),UP=()=>({t:'unp'}),sw=(a,i,j)=>{[a[i],a[j]]=[a[j],a[i]]};
+
+function* bubble(a){const n=a.length;for(let p=0;p<n-1;p++){let d=0;yield L(3);yield L(4);yield L(5);
+ for(let i=0;i<n-1-p;i++){yield C(i,i+1,6);if(a[i]>a[i+1]){yield S(i,i+1,7);sw(a,i,i+1);d=1;yield L(8)}}
+ yield OK(n-1-p);yield L(9);if(!d){yield L(10);break}}}
+function* selection(a){const n=a.length;for(let i=0;i<n-1;i++){yield L(3);let m=i;yield L(4);yield PV(m,4);
+ for(let j=i+1;j<n;j++){yield C(j,m,6,`a[${j}] < a[${m}] ?`);if(a[j]<a[m]){yield UP();m=j;yield L(7);yield PV(m,7)}}
+ if(m!==i){yield S(i,m,8);sw(a,i,m)}yield UP();yield OK(i,8)}}
+function* insertion(a){for(let i=1;i<a.length;i++){yield L(2);let j=i;yield L(3);
+ while(j>0){yield C(j-1,j,4);if(a[j-1]>a[j]){yield S(j-1,j,5);sw(a,j-1,j);j--;yield L(6)}else break}}}
+function* quick(a,lo=0,hi=a.length-1){if(lo>hi)return;if(lo===hi){yield OK(lo,2);return}
+ yield L(2);yield L(3);const pv=a[hi];yield PV(hi,8);let i=lo;yield L(9);
+ for(let j=lo;j<hi;j++){yield C(j,hi,11,`a[${j}] < pivot ?`);if(a[j]<pv){if(i!==j){yield S(i,j,12);sw(a,i,j)}i++;yield L(13)}}
+ if(i!==hi){yield S(i,hi,14);sw(a,i,hi)}yield UP();yield OK(i,15);
+ yield L(4);yield*quick(a,lo,i-1);yield L(5);yield*quick(a,i+1,hi)}
+function* merge(a,lo=0,hi=a.length-1){if(lo>=hi)return;yield L(2);const mid=(lo+hi)>>1;yield L(3);
+ yield L(4);yield*merge(a,lo,mid);yield L(5);yield*merge(a,mid+1,hi);yield L(6);
+ let i=lo,j=mid+1,m=mid;yield L(9);
+ while(i<=m&&j<=hi){yield C(i,j,11,`a[${i}] <= a[${j}] ?`);if(a[i]<=a[j]){i++;yield L(12)}
+  else{const v=a.splice(j,1)[0];a.splice(i,0,v);yield M(j,i,14);i++;m++;j++;yield L(15)}}}
+function* sift(a,i,n){while(1){yield L(11);let b=i;const l=2*i+1,r=l+1;
+ if(l<n){yield C(l,b,13,`a[${l}] > a[${b}] ?`);if(a[l]>a[b])b=l}
+ if(r<n){yield C(r,b,14,`a[${r}] > a[${b}] ?`);if(a[r]>a[b])b=r}
+ if(b===i){yield L(15);return}yield S(i,b,16);sw(a,i,b);i=b;yield L(17)}}
+function* heap(a){const n=a.length;yield L(2);for(let i=(n>>1)-1;i>=0;i--){yield L(3);yield L(4);yield*sift(a,i,n)}
+ for(let e=n-1;e>0;e--){yield L(5);yield S(0,e,6);sw(a,0,e);yield OK(e,6);yield L(7);yield*sift(a,0,e)}}
+
+const ALGOS={
+bubble:{n:'Bubble',title:'BUBBLE SORT',desc:'Repeatedly swaps adjacent out-of-order pairs, letting larger values bubble toward the end.',t:'O(n²)',s:'O(1)',gen:bubble,code:`def bubble_sort(a):
+    n = len(a)
+    for p in range(n - 1):
+        swapped = False
+        for i in range(n - 1 - p):
+            if a[i] > a[i + 1]:
+                a[i], a[i + 1] = a[i + 1], a[i]
+                swapped = True
+        if not swapped:
+            break`},
+selection:{n:'Selection',title:'SELECTION SORT',desc:'Finds the smallest remaining value on each pass and swaps it into place.',t:'O(n²)',s:'O(1)',gen:selection,code:`def selection_sort(a):
+    n = len(a)
+    for i in range(n - 1):
+        m = i
+        for j in range(i + 1, n):
+            if a[j] < a[m]:
+                m = j
+        a[i], a[m] = a[m], a[i]`},
+insertion:{n:'Insertion',title:'INSERTION SORT',desc:'Grows a sorted section on the left by sliding each new value back to its spot.',t:'O(n²)',s:'O(1)',gen:insertion,code:`def insertion_sort(a):
+    for i in range(1, len(a)):
+        j = i
+        while j > 0 and a[j - 1] > a[j]:
+            a[j - 1], a[j] = a[j], a[j - 1]
+            j -= 1`},
+quick:{n:'Quick',title:'QUICK SORT',desc:'Picks a pivot, moves smaller values before it, then sorts each side the same way.',t:'O(n log n) avg',s:'O(log n)',gen:a=>quick(a),code:`def quick_sort(a, lo, hi):
+    if lo < hi:
+        p = partition(a, lo, hi)
+        quick_sort(a, lo, p - 1)
+        quick_sort(a, p + 1, hi)
+
+def partition(a, lo, hi):
+    pivot = a[hi]
+    i = lo
+    for j in range(lo, hi):
+        if a[j] < pivot:
+            a[i], a[j] = a[j], a[i]
+            i += 1
+    a[i], a[hi] = a[hi], a[i]
+    return i`},
+merge:{n:'Merge',title:'MERGE SORT',desc:'Splits the list in halves, sorts each half, then merges them back in order.',t:'O(n log n)',s:'O(n)',gen:a=>merge(a),code:`def merge_sort(a, lo, hi):
+    if lo >= hi: return
+    mid = (lo + hi) // 2
+    merge_sort(a, lo, mid)
+    merge_sort(a, mid + 1, hi)
+    merge(a, lo, mid, hi)
+
+def merge(a, lo, mid, hi):
+    i, j = lo, mid + 1
+    while i <= mid and j <= hi:
+        if a[i] <= a[j]:
+            i += 1
+        else:
+            a.insert(i, a.pop(j))
+            i += 1; mid += 1; j += 1`},
+heap:{n:'Heap',title:'HEAP SORT',desc:'Builds a max-heap, then repeatedly swaps the largest value to the end.',t:'O(n log n)',s:'O(1)',gen:heap,code:`def heap_sort(a):
+    n = len(a)
+    for i in range(n // 2 - 1, -1, -1):
+        sift_down(a, i, n)
+    for end in range(n - 1, 0, -1):
+        a[0], a[end] = a[end], a[0]
+        sift_down(a, 0, end)
+
+def sift_down(a, i, n):
+    while True:
+        big = i
+        l, r = 2*i + 1, 2*i + 2
+        if l < n and a[l] > a[big]: big = l
+        if r < n and a[r] > a[big]: big = r
+        if big == i: return
+        a[i], a[big] = a[big], a[i]
+        i = big`}};
+
+const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const hlsrc=t=>esc(t).replace(/\b(def|for|in|if|else|not|while|return|and|or|True|False|break)\b/g,'<span class="k">$1</span>').replace(/\b(\w+_sort|partition|merge|sift_down|len|range)\b(?=\()/g,'<span class="f">$1</span>');
+const hl=n=>codeEl.querySelectorAll('.ln').forEach(e=>e.classList.toggle('act',+e.dataset.l===n));
+const say=(t,c)=>{st.textContent=t;st.className='status '+(c||'')};
+const cx=k=>k*PITCH+4+BW/2;
+function aim(x,k){th=Math.max(-.62,Math.min(.62,-Math.atan2(x-176,84)))*k;
+ hero.style.transform=`rotate(${th}rad)`;heroSvg.style.transform=`perspective(260px) rotateY(${(-th*70).toFixed(1)}deg)`}
+function beams(i,j,on){const c=Math.cos(th),s=Math.sin(th),[p,q]=i<=j?[i,j]:[j,i];
+ [b1,b2].forEach((b,k)=>{const idx=k?q:p,px=k?20:-20,py=86;
+  b.setAttribute('x1',176+px*c-py*s);b.setAttribute('y1',26+px*s+py*c);
+  b.setAttribute('x2',cx(idx));b.setAttribute('y2',330-BASE-items[idx].h-34);b.classList.toggle('on',on)})}
+function place(){items.forEach((o,i)=>o.el.style.left=(i*PITCH+4)+'px')}
+function build(){stage.innerHTML='';const n=vals.length;PITCH=Math.min(44,Math.floor(344/n));BW=PITCH-6;
+ const mn=Math.min(...vals),mx=Math.max(...vals);
+ items=vals.map(v=>{const el=document.createElement('div');el.className='bar';el.textContent=v;
+  const h=26+(mx===mn?.5:(v-mn)/(mx-mn))*96;el.style.height=h+'px';el.style.width=BW+'px';el.style.fontSize=BW<30?'.68rem':'.95rem';
+  stage.appendChild(el);return{v,el,h}});place()}
+function ui(){const A=ALGOS[key];$('title').textContent=A.title;$('desc').textContent=A.desc;$('tm').textContent='TIME '+A.t;$('sp').textContent='SPACE '+A.s;
+ codeEl.innerHTML=A.code.split('\n').map((t,i)=>`<span class="ln" data-l="${i+1}"><i>${i+1}</i>${hlsrc(t)}</span>`).join('');
+ document.querySelectorAll('#algos button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===key));$('nums').value=vals.join(', ')}
+const mark=(i,j,c,on)=>[i,j].forEach(k=>items[k].el.classList.toggle(c,on));
+async function step(ev,w){
+ if(ev.line)hl(ev.line);
+ if(ev.t==='line'){if(ev.msg)say(ev.msg);await w(ev.ms||280)}
+ else if(ev.t==='cmp'){mark(ev.i,ev.j,'cmp',1);say(ev.msg,'blue');aim((cx(ev.i)+cx(ev.j))/2,.5);await w(700);mark(ev.i,ev.j,'cmp',0)}
+ else if(ev.t==='swap'){const{i,j}=ev;say(ev.msg,'orange');aim((cx(i)+cx(j))/2,1);await w(550);
+  mark(i,j,'sw',1);beams(i,j,1);await w(400);[items[i],items[j]]=[items[j],items[i]];place();beams(i,j,1);await w(550);
+  beams(i,j,0);await w(200);mark(i,j,'sw',0)}
+ else if(ev.t==='move'){const{f,to}=ev;say(ev.msg,'orange');aim(cx(f),1);await w(550);
+  items[f].el.classList.add('sw');beams(f,f,1);await w(400);const o=items.splice(f,1)[0];items.splice(to,0,o);place();beams(to,to,1);await w(600);
+  beams(to,to,0);await w(200);o.el.classList.remove('sw')}
+ else if(ev.t==='ok'){ev.idx.forEach(k=>items[k].el.classList.add('ok'));await w(350)}
+ else if(ev.t==='piv'){items[ev.i].el.classList.add('piv');say(`pivot = ${items[ev.i].v}`);await w(450)}
+ else if(ev.t==='unp'){items.forEach(o=>o.el.classList.remove('piv'))}}
+
+async function run(){const tok=++cur;const w=async ms=>{await sleep(ms/speed);while(paused)await sleep(80);if(tok!==cur)throw 0};
+ hero.classList.remove('win');aim(176,0);say('');
+ try{await w(500);for(const ev of ALGOS[key].gen(vals.slice()))await step(ev,w);
+  items.forEach(o=>o.el.classList.add('ok'));hl(0);say('sorted!','green');
+  hero.style.transform='';heroSvg.style.transform='';hero.classList.add('win')}catch(e){}}
+function restart(){cur++;paused=false;$('pp').textContent='Pause';ui();build();run()}
+Object.keys(ALGOS).forEach(k=>{const b=document.createElement('button');b.textContent=ALGOS[k].n;b.dataset.k=k;b.onclick=()=>{key=k;restart()};$('algos').appendChild(b)});
+$('apply').onclick=()=>{const parts=$('nums').value.trim().split(/[\s,]+/).filter(Boolean),nums=parts.map(Number);
+ if(parts.length<2||parts.length>12||nums.some(x=>!Number.isInteger(x)||x<-99||x>999)){$('err').textContent='Enter 2 to 12 whole numbers between -99 and 999, separated by commas.';return}
+ $('err').textContent='';vals=nums;restart()};
+$('nums').addEventListener('keydown',e=>{if(e.key==='Enter')$('apply').click()});
+$('rs').onclick=()=>{const n=vals.length;vals=Array.from({length:n},()=>1+Math.floor(Math.random()*60));$('err').textContent='';restart()};
+$('pp').onclick=e=>{paused=!paused;e.target.textContent=paused?'Play':'Pause'};
+$('scene').onclick=()=>$('pp').click();
+$('spd').oninput=e=>{speed=+e.target.value};
+restart();
+</script>
+</body>
+</html>
